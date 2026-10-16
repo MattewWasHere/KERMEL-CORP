@@ -8,7 +8,7 @@
     this.view.bindSubmit(this.handleSubmit.bind(this));
   };
 
-  LoginController.prototype.handleSubmit = function (event) {
+  LoginController.prototype.handleSubmit = async function (event) {
     event.preventDefault();
 
     var credentials = this.view.getCredentials();
@@ -20,15 +20,13 @@
       return;
     }
 
-    var user = this.model.findUser(username, password);
-
-    if (user) {
+    try {
+      var user = await this.model.login(username, password);
       this.view.setMessage("success", "Bienvenido " + user.username + ". Acceso autorizado.");
       this.view.resetForm();
-      return;
+    } catch (error) {
+      this.view.setMessage("error", error.message);
     }
-
-    this.view.setMessage("error", "Credenciales incorrectas. Intenta nuevamente.");
   };
 
   function RegisterController(model, view) {
@@ -40,7 +38,7 @@
     this.view.bindSubmit(this.handleSubmit.bind(this));
   };
 
-  RegisterController.prototype.handleSubmit = function (event) {
+  RegisterController.prototype.handleSubmit = async function (event) {
     event.preventDefault();
 
     var data = this.view.getCredentials();
@@ -56,14 +54,18 @@
     }
 
     var user = {
-      username: data.name.trim(),
+      name: data.name.trim(),
       email: data.email.trim(),
-      password: data.password.trim()
+      password: data.password
     };
 
-    this.model.saveUser(user);
-    this.view.setMessage("success", "Cuenta creada correctamente. Ya puedes iniciar sesión.");
-    this.view.resetForm();
+    try {
+      await this.model.register(user);
+      this.view.setMessage("success", "Cuenta creada correctamente. Ya puedes iniciar sesión.");
+      this.view.resetForm();
+    } catch (error) {
+      this.view.setMessage("error", error.message);
+    }
   };
 
   window.LoginController = LoginController;

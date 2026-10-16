@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (adminForm) {
     var adminView = new AuthView("adminLoginForm", "adminMessage");
     new LoginController(authModel, adminView).init();
-    adminView.setMessage("success", "Acceso exclusivo para administradores.");
   }
 
   var registerForm = document.getElementById("registerForm");
