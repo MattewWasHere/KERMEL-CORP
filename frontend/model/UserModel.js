@@ -1,6 +1,6 @@
 (function () {
   function UserModel() {
-    this.apiUrl = "http://127.0.0.1:8000/api";
+    this.apiUrl = "/api";
   }
 
   UserModel.prototype.request = async function (path, data) {

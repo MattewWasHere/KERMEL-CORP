@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KERMEL CORP | Panel de ventas</title>
+    <link rel="stylesheet" href="view/Dashboard.css" />
+  </head>
+  <body>
+    <aside>
+      <h2>KERMEL CORP</h2>
+      <a href="#resumen" class="activo">Resumen</a>
+      <a href="#graficos">Gráficos</a>
+      <a href="#pedidos">Pedidos</a>
+    </aside>
+
+    <main class="contenido">
+      <div class="barra">
+        <h1>
+          Ventas en vivo
+          <span id="estadoConexion" class="vivo">
+            <span class="punto"></span>
+            <span id="textoConexion">Conectando…</span>
+          </span>
+        </h1>
+        <div class="controles">
+          <button id="btnPausa" type="button">Pausar</button>
+          <button id="btnOscuro" type="button">Modo oscuro</button>
+          <button id="btnCerrarSesion" type="button">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <section id="resumen" class="tarjetas" aria-label="Resumen de ventas"></section>
+
+      <section id="graficos" class="graficos">
+        <div class="panel">
+          <h2>Ventas de los últimos 2 minutos</h2>
+          <div class="caja-grafico"><canvas id="grafLinea"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>Ventas por categoría</h2>
+          <div class="caja-grafico"><canvas id="grafDona"></canvas></div>
+        </div>
+      </section>
+
+      <section id="pedidos" class="panel">
+        <h2>Últimos pedidos</h2>
+        <form id="pedidoForm" class="pedido-form">
+          <div class="campos-pedido">
+            <div class="campo-pedido">
+              <label for="pedidoCliente">Cliente</label>
+              <input id="pedidoCliente" name="cliente" maxlength="120" required />
+            </div>
+            <div class="campo-pedido">
+              <label for="pedidoProducto">Producto</label>
+              <input id="pedidoProducto" name="producto" maxlength="120" required />
+            </div>
+            <div class="campo-pedido">
+              <label for="pedidoCategoria">Categoría</label>
+              <input id="pedidoCategoria" name="categoria" maxlength="80" required />
+            </div>
+            <div class="campo-pedido">
+              <label for="pedidoTotal">Total (COP)</label>
+              <input id="pedidoTotal" name="total" type="number" min="1" step="1" required />
+            </div>
+            <div class="campo-pedido">
+              <label for="pedidoEstado">Estado</label>
+              <select id="pedidoEstado" name="estado">
+                <option>Pagado</option>
+                <option>Pendiente</option>
+                <option>Cancelado</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <button type="submit">Guardar pedido</button>
+            <p id="mensajePedido" class="mensaje-pedido" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Total</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    <script src="controller/DashboardController.js"></script>
+  </body>
+</html>

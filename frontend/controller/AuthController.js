@@ -24,6 +24,7 @@
       var user = await this.model.login(username, password);
       this.view.setMessage("success", "Bienvenido " + user.username + ". Acceso autorizado.");
       this.view.resetForm();
+      window.location.assign("Dashboard.html");
     } catch (error) {
       this.view.setMessage("error", error.message);
     }

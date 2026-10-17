@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KERMEL CORP | Login</title>
+    <title>KERMEL CORP | Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,36 +14,33 @@
       <header class="auth-brand">
         <div class="brand-logo">K</div>
         <div>
-          <p class="brand-subtitle">Distribución tecnológica</p>
+          <p class="brand-subtitle">Panel administrativo</p>
           <h1>KERMEL CORP</h1>
         </div>
       </header>
 
-      <p class="brand-copy">
-        Soluciones en componentes y dispositivos tecnológicos para tu negocio.
-      </p>
+      <p class="brand-copy">Acceso exclusivo para administración y control del sistema.</p>
 
-      <section class="auth-card" aria-label="Inicio de sesión de usuarios">
-        <h2>Iniciar sesión</h2>
+      <section class="auth-card" aria-label="Inicio de sesión administrador">
+        <h2>Administrador</h2>
 
-        <form id="loginForm" novalidate>
+        <form id="adminLoginForm" novalidate>
           <div class="input-group">
-            <label for="username">Usuario o correo</label>
-            <input id="username" name="username" type="text" placeholder="ej. admin@kermelcorp.com" />
+            <label for="username">Usuario administrador</label>
+            <input id="username" name="username" type="text" autocomplete="username" />
           </div>
 
           <div class="input-group">
             <label for="password">Contraseña</label>
-            <input id="password" name="password" type="password" placeholder="Ingrese su contraseña" />
+            <input id="password" name="password" type="password" autocomplete="current-password" />
           </div>
 
           <button type="submit" class="primary-btn">Entrar</button>
-          <div id="message" class="message" aria-live="polite"></div>
+          <div id="adminMessage" class="message" aria-live="polite"></div>
         </form>
 
         <div class="auth-links">
-          <a href="register.html">Crear una cuenta nueva</a>
-          <a href="admin.html">Acceso administrador</a>
+          <a href="index.html">Volver al login</a>
         </div>
       </section>
     </main>
