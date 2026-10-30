@@ -24,9 +24,9 @@ EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register_user(user: RegisterRequest) -> dict[str, str]:
-    name = user.name.strip()
-    email = user.email.strip().lower()
+def register_user(registration: RegisterRequest) -> dict[str, str]:
+    name = registration.name.strip()
+    email = registration.email.strip().lower()
     if not name:
         raise HTTPException(status_code=400, detail="El nombre es obligatorio.")
     if not EMAIL_PATTERN.fullmatch(email):
@@ -36,7 +36,7 @@ def register_user(user: RegisterRequest) -> dict[str, str]:
         with database.get_connection() as connection:
             cursor = connection.execute(
                 "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-                (name, email, hash_password(user.password)),
+                (name, email, hash_password(registration.password)),
             )
             user_id = cursor.lastrowid
     except sqlite3.IntegrityError as error:
@@ -61,7 +61,7 @@ def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
             (identifier, identifier),
         ).fetchall()
 
-    user = next(
+    authenticated_user = next(
         (
             candidate
             for candidate in users
@@ -69,7 +69,7 @@ def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
         ),
         None,
     )
-    if user is None:
+    if authenticated_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales incorrectas.",
@@ -86,7 +86,7 @@ def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
             "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)",
             (
                 session_hash(token),
-                user["id"],
+                authenticated_user["id"],
                 (now + SESSION_DURATION).isoformat(),
             ),
         )
@@ -101,9 +101,9 @@ def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
         path="/",
     )
     return {
-        "id": str(user["id"]),
-        "username": user["name"],
-        "email": user["email"],
+        "id": str(authenticated_user["id"]),
+        "username": authenticated_user["name"],
+        "email": authenticated_user["email"],
     }
 
 

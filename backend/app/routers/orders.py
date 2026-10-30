@@ -24,9 +24,8 @@ def serialize_order(order: sqlite3.Row) -> dict[str, object]:
     }
 
 
-@router.get("/recientes")
+@router.get("/recientes", dependencies=[Depends(get_current_user)])
 def recent_orders(
-    user: Annotated[dict[str, object], Depends(get_current_user)],
     limite: Annotated[int, Query(ge=1, le=100)] = 12,
 ) -> list[dict[str, object]]:
     with database.get_connection() as connection:
@@ -37,9 +36,8 @@ def recent_orders(
     return [serialize_order(order) for order in orders]
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(get_current_user)])
 def orders_since(
-    user: Annotated[dict[str, object], Depends(get_current_user)],
     desde: Annotated[int, Query(ge=0)] = 0,
     limite: Annotated[int, Query(ge=1, le=500)] = 100,
 ) -> list[dict[str, object]]:

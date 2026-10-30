@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="view/styles.css" />
+    <link rel="stylesheet" href="view/styles.css?v=2" />
   </head>
   <body class="auth-body">
     <main class="auth-shell">
@@ -24,25 +24,25 @@
       <section class="auth-card" aria-label="Crear nueva cuenta">
         <h2>Crear cuenta</h2>
 
-        <form id="registerForm" novalidate>
+        <form id="registerForm">
           <div class="input-group">
             <label for="name">Nombre completo</label>
-            <input id="name" name="name" type="text" autocomplete="name" />
+            <input id="name" name="name" type="text" autocomplete="name" maxlength="100" required />
           </div>
 
           <div class="input-group">
             <label for="email">Correo electrónico</label>
-            <input id="email" name="email" type="email" autocomplete="email" />
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required />
           </div>
 
           <div class="input-group">
             <label for="password">Contraseña</label>
-            <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" />
+            <input id="password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required />
           </div>
 
           <div class="input-group">
             <label for="confirmPassword">Confirmar contraseña</label>
-            <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" />
+            <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required />
           </div>
 
           <button type="submit" class="primary-btn">Registrar</button>
@@ -55,6 +55,7 @@
       </section>
     </main>
 
+    <script src="controller/api-config.js"></script>
     <script src="model/UserModel.js"></script>
     <script src="view/AuthView.js"></script>
     <script src="controller/AuthController.js"></script>

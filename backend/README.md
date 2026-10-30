@@ -1,48 +1,57 @@
 # API de KERMEL CORP
 
-API sencilla con FastAPI y SQLite. La base de datos se crea automáticamente en
+API FastAPI con SQLite. La base de datos se crea automáticamente en
 `backend/data/kermel.db` al iniciar el servidor.
 
-## Iniciar
+Para instalar y lanzar el frontend y el backend juntos en Windows o Linux,
+consulta el [README principal](../README.md). Los comandos de esta página
+sirven para trabajar únicamente con la API o ejecutar sus pruebas.
 
-Desde esta carpeta, crea un entorno virtual, instala dependencias e inicia el
-servidor:
+## Iniciar solo la API
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-En Windows, activa el entorno con `.venv\Scripts\activate`.
-
-Para instalar dependencias de pruebas y ejecutar la suite automatizada:
+Desde la carpeta `backend/`, usa el Python del entorno virtual del proyecto:
 
 ```bash
-pip install -r requirements-dev.txt
-pytest -q
+# Linux/macOS, con .venv en la raíz
+../.venv/bin/python -m uvicorn app.main:app --reload
 ```
 
-También puedes iniciar el servidor directamente desde la carpeta del proyecto:
-
-```bash
-.venv/bin/python backend/app/main.py
+```powershell
+# Windows, con .venv en la raíz
+..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-En Windows, usa `.venv\Scripts\python.exe backend\app\main.py`.
+Si el entorno virtual está dentro de `backend/`, usa `.venv/bin/python` en
+Linux/macOS o `.venv\Scripts\python.exe` en Windows.
 
 - API: <http://127.0.0.1:8000>
-- Documentación interactiva: <http://127.0.0.1:8000/docs>
+- Documentación: <http://127.0.0.1:8000/docs>
 - Comprobación: `GET /api/health`
-- Productos precargados para el dashboard y catálogo: `GET /api/products`
-- Registro: `POST /api/auth/register` con `{ "name": "...", "email": "...", "password": "..." }`
-- Inicio de sesión: `POST /api/auth/login` con `{ "username": "nombre o correo", "password": "..." }`
+- Catálogo: `GET /api/products`
 
-El dashboard de `frontend/KERMEL-CORP/Dashboard.html` consulta `/api/products`
-para mostrar el inventario de `backend/data/products.json`. Inicia la API y abre
-el frontend desde `http://localhost:5500` o `http://127.0.0.1:5500`.
+## Datos
 
-El frontend debe abrirse mediante un servidor local (por ejemplo, Live Server
-en el puerto 5500), no directamente como archivo. Para cambiar el puerto
-permitido, edita la configuración CORS en `app/main.py`.
+Los usuarios, las sesiones, los pedidos y los productos se guardan en la base
+de datos persistente `backend/data/kermel.db`. No elimines ese archivo si
+necesitas conservar los datos.
+
+En el primer inicio, el catálogo se importa desde `backend/data/products.json`.
+La importación ocurre una sola vez; después SQLite es la fuente de verdad y el
+JSON sirve como respaldo de los datos iniciales.
+
+## Pruebas
+
+Desde la carpeta `backend/`:
+
+```bash
+# Linux/macOS, con .venv en la raíz
+../.venv/bin/python -m pytest -q
+```
+
+```powershell
+# Windows, con .venv en la raíz
+..\.venv\Scripts\python.exe -m pytest -q
+```
+
+Si el entorno está dentro de `backend/`, reemplaza el ejecutable por
+`.venv/bin/python` o `.venv\Scripts\python.exe`, según el sistema.

@@ -1,40 +1,23 @@
-(function () {
-  function UserModel() {
-    this.apiUrl = "/api";
-  }
-
-  UserModel.prototype.request = async function (path, data) {
-    var response;
-    try {
-      response = await fetch(this.apiUrl + path, {
+class UserModel {
+  request(path, data) {
+    return window.KERMEL_API.request(
+      path,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
-      });
-    } catch (error) {
-      throw new Error("No se pudo conectar con la API. Verifica que FastAPI esté iniciado.");
-    }
+      },
+      "La solicitud no se pudo completar."
+    );
+  }
 
-    var result = await response.json();
-    if (!response.ok) {
-      var detail = result.detail;
-      if (Array.isArray(detail)) {
-        detail = detail.map(function (item) {
-          return item.msg;
-        }).join(" ");
-      }
-      throw new Error(detail || "La solicitud no se pudo completar.");
-    }
-    return result;
-  };
-
-  UserModel.prototype.login = function (username, password) {
+  login(username, password) {
     return this.request("/auth/login", { username: username, password: password });
-  };
+  }
 
-  UserModel.prototype.register = function (user) {
+  register(user) {
     return this.request("/auth/register", user);
-  };
+  }
+}
 
-  window.UserModel = UserModel;
-})();
+window.UserModel = UserModel;

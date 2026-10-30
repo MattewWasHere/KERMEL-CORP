@@ -1,5 +1,5 @@
-(function () {
-  function AuthView(formId, messageId) {
+class AuthView {
+  constructor(formId, messageId) {
     this.form = document.getElementById(formId);
     this.message = document.getElementById(messageId);
     this.usernameInput = document.getElementById("username");
@@ -9,31 +9,42 @@
     this.confirmPasswordInput = document.getElementById("confirmPassword");
   }
 
-  AuthView.prototype.bindSubmit = function (handler) {
-    if (this.form) {
-      this.form.addEventListener("submit", handler);
-    }
-  };
+  bindSubmit(handler) {
+    this.form?.addEventListener("submit", handler);
+  }
 
-  AuthView.prototype.getCredentials = function () {
+  getCredentials() {
     return {
-      username: this.usernameInput ? this.usernameInput.value : "",
-      password: this.passwordInput ? this.passwordInput.value : "",
-      name: this.nameInput ? this.nameInput.value : "",
-      email: this.emailInput ? this.emailInput.value : "",
-      confirmPassword: this.confirmPasswordInput ? this.confirmPasswordInput.value : ""
+      username: this.usernameInput?.value ?? "",
+      password: this.passwordInput?.value ?? "",
+      name: this.nameInput?.value ?? "",
+      email: this.emailInput?.value ?? "",
+      confirmPassword: this.confirmPasswordInput?.value ?? ""
     };
-  };
+  }
 
-  AuthView.prototype.setMessage = function (type, text) {
+  setMessage(type, text) {
     if (!this.message) return;
     this.message.className = "message " + type;
     this.message.textContent = text;
-  };
+  }
 
-  AuthView.prototype.resetForm = function () {
-    if (this.form) this.form.reset();
-  };
+  resetForm() {
+    this.form?.reset();
+  }
 
-  window.AuthView = AuthView;
-})();
+  setSubmitting(isSubmitting, pendingText) {
+    if (!this.form) return;
+
+    var button = this.form.querySelector('button[type="submit"]');
+    if (!button) return;
+
+    if (!button.dataset.idleLabel) {
+      button.dataset.idleLabel = button.textContent.trim();
+    }
+    button.disabled = isSubmitting;
+    button.textContent = isSubmitting ? pendingText : button.dataset.idleLabel;
+  }
+}
+
+window.AuthView = AuthView;

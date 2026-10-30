@@ -1,6 +1,6 @@
 const CONFIG = {
-  ordersUrl: "/api/pedidos",
-  historyUrl: "/api/pedidos/recientes",
+  ordersUrl: "/pedidos",
+  historyUrl: "/pedidos/recientes",
   refreshInterval: 5000,
   visibleOrders: 12,
   chartBlockSeconds: 5,
@@ -43,32 +43,6 @@ const escapeHtml = value =>
 
 function errorMessage(error, fallback) {
   return error instanceof Error ? error.message : fallback;
-}
-
-async function requestJson(url, options, fallbackMessage) {
-  let response;
-  try {
-    response = await fetch(url, options);
-  } catch {
-    throw new Error("No se pudo conectar con la API. Verifica que FastAPI esté iniciado.");
-  }
-
-  let result;
-  try {
-    result = await response.json();
-  } catch {
-    throw new Error("La API devolvió una respuesta no válida.");
-  }
-
-  if (!response.ok) {
-    const detail = Array.isArray(result.detail)
-      ? result.detail.map(error => error.msg).join(" ")
-      : result.detail;
-    throw new Error(
-      detail || (response.status === 401 ? "La sesión expiró." : fallbackMessage)
-    );
-  }
-  return result;
 }
 
 function setConnectionState(state, message) {
@@ -213,7 +187,7 @@ function refreshDashboard() {
 }
 
 async function loadHistory() {
-  const history = await requestJson(
+  const history = await window.KERMEL_API.request(
     CONFIG.historyUrl,
     {},
     "No se pudo cargar el historial."
@@ -227,7 +201,7 @@ async function pollOrders() {
 
   polling = true;
   try {
-    const newOrders = await requestJson(
+    const newOrders = await window.KERMEL_API.request(
       `${CONFIG.ordersUrl}?desde=${latestOrderId}`,
       {},
       "No se pudo actualizar."
@@ -261,7 +235,7 @@ async function submitOrder(event) {
   message.textContent = "Guardando pedido…";
 
   try {
-    const result = await requestJson(CONFIG.ordersUrl, {
+    const result = await window.KERMEL_API.request(CONFIG.ordersUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(order)
@@ -280,7 +254,9 @@ async function submitOrder(event) {
 
 async function logout() {
   try {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await window.KERMEL_API.request("/auth/logout", {
+      method: "POST",
+    }, "No se pudo cerrar la sesión.");
   } finally {
     window.location.assign("index.html");
   }
@@ -288,10 +264,14 @@ async function logout() {
 
 async function initializeDashboard() {
   try {
-    const sessionResponse = await fetch("/api/auth/me");
-    if (!sessionResponse.ok) {
-      window.location.replace("index.html");
-      return;
+    try {
+      await window.KERMEL_API.request("/auth/me", {}, "No se pudo validar la sesión.");
+    } catch (error) {
+      if (error.status === 401) {
+        window.location.replace("index.html");
+        return;
+      }
+      throw error;
     }
 
     timeLabels[timeLabels.length - 1] = formatTime(new Date());

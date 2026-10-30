@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 
+from app import database
+
 
 PRODUCTS_PATH = Path(__file__).resolve().parent.parent / "data" / "products.json"
 
-# Productos de ejemplo. Solo se usan para crear products.json la primera vez,
-# si el archivo todavía no existe. Después se edita directamente el JSON.
-# Formato: (nombre, categoría, marca, precio, socket, stock, icono, specs)
+# Productos iniciales para instalaciones nuevas que no tengan un catálogo JSON
+# anterior que importar.
+# Formato: (nombre, categoría, marca, precio, socket, stock, icono, especificaciones)
 SEED_PRODUCTS = [
     # Procesadores
     ("Ryzen 5 5600", "Procesador", "AMD", 520000, "AM4", 12, "🧠", ["6 núcleos / 12 hilos", "Hasta 4.4 GHz"]),
@@ -56,18 +58,80 @@ def _build_seed() -> list[dict]:
     ]
 
 
-def save_products(products: list[dict]) -> None:
-    PRODUCTS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    # Se escribe primero en un archivo temporal y luego se reemplaza,
-    # para no dejar el JSON a medias si algo falla.
-    temporal = PRODUCTS_PATH.with_suffix(".json.tmp")
-    with open(temporal, "w", encoding="utf-8") as archivo:
-        json.dump(products, archivo, ensure_ascii=False, indent=2)
-    temporal.replace(PRODUCTS_PATH)
+def initialize_products() -> None:
+    with database.get_connection() as connection:
+        initialized = connection.execute(
+            "SELECT 1 FROM app_metadata WHERE key = ?",
+            ("products_initialized",),
+        ).fetchone()
+        if initialized:
+            return
+
+        existing_products = connection.execute(
+            "SELECT 1 FROM products LIMIT 1"
+        ).fetchone()
+        if existing_products:
+            connection.execute(
+                "INSERT INTO app_metadata (key, value) VALUES (?, ?)",
+                ("products_initialized", "true"),
+            )
+            return
+
+        if PRODUCTS_PATH.exists():
+            with PRODUCTS_PATH.open(encoding="utf-8") as products_file:
+                products = json.load(products_file)
+        else:
+            products = _build_seed()
+
+        for product in products:
+            connection.execute(
+                """
+                INSERT INTO products (
+                    id, name, category, brand, price, socket, stock, icon, specs, image
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    product["id"],
+                    product["name"],
+                    product["category"],
+                    product["brand"],
+                    product["price"],
+                    product.get("socket"),
+                    product["stock"],
+                    product["icon"],
+                    json.dumps(product["specs"], ensure_ascii=False),
+                    product.get("image"),
+                ),
+            )
+
+        connection.execute(
+            "INSERT INTO app_metadata (key, value) VALUES (?, ?)",
+            ("products_initialized", "true"),
+        )
 
 
 def load_products() -> list[dict]:
-    if not PRODUCTS_PATH.exists():
-        save_products(_build_seed())
-    with open(PRODUCTS_PATH, "r", encoding="utf-8") as archivo:
-        return json.load(archivo)
+    with database.get_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT id, name, category, brand, price, socket, stock, icon, specs, image
+            FROM products
+            ORDER BY id
+            """
+        ).fetchall()
+
+    return [
+        {
+            "id": product["id"],
+            "name": product["name"],
+            "category": product["category"],
+            "brand": product["brand"],
+            "price": product["price"],
+            "socket": product["socket"],
+            "stock": product["stock"],
+            "icon": product["icon"],
+            "specs": json.loads(product["specs"]),
+            "image": product["image"],
+        }
+        for product in rows
+    ]

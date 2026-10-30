@@ -49,7 +49,7 @@ def get_current_user(
     now = datetime.now(timezone.utc)
     hashed_token = session_hash(token)
     with database.get_connection() as connection:
-        session = connection.execute(
+        session_record = connection.execute(
             """
             SELECT users.id, users.name, users.email, sessions.expires_at
             FROM sessions
@@ -58,29 +58,27 @@ def get_current_user(
             """,
             (hashed_token,),
         ).fetchone()
-        if session is None:
+        if session_record is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="La sesión no es válida. Inicia sesión de nuevo.",
             )
 
-        if datetime.fromisoformat(session["expires_at"]) <= now:
+        session_expired = datetime.fromisoformat(session_record["expires_at"]) <= now
+        if session_expired:
             connection.execute(
                 "DELETE FROM sessions WHERE token_hash = ?",
                 (hashed_token,),
             )
-            expired = True
-        else:
-            expired = False
 
-    if expired:
+    if session_expired:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="La sesión expiró. Inicia sesión de nuevo.",
         )
 
     return {
-        "id": session["id"],
-        "username": session["name"],
-        "email": session["email"],
+        "id": session_record["id"],
+        "username": session_record["name"],
+        "email": session_record["email"],
     }

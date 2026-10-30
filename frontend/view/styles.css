@@ -32,10 +32,13 @@ html, body {
 body {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
   display: grid;
-  place-items: center;
+  align-content: safe center;
+  justify-items: center;
   padding: 24px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body::before,
@@ -193,6 +196,19 @@ body::after {
 
 .primary-btn:hover {
   transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+}
+
+.input-group input:focus-visible,
+.primary-btn:focus-visible,
+.auth-links a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .message {
