@@ -31,8 +31,6 @@ python3 -m venv .venv
 
 Desde la raíz del proyecto, ejecuta el lanzador de tu sistema:
 
-- **Windows:** haz doble clic en `start-windows.bat` o ejecútalo desde CMD.
-- **Linux/macOS:** `bash scripts/start-linux.sh`
 
 Los lanzadores inician FastAPI y un servidor local para el frontend. Si no
 encuentran las dependencias, muestran el comando para instalarlas. Deja

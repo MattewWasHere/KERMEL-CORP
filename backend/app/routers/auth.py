@@ -23,7 +23,6 @@ router = APIRouter(prefix="/api/auth", tags=["autenticación"])
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(registration: RegisterRequest) -> dict[str, str]:
     name = registration.name.strip()
     email = registration.email.strip().lower()
@@ -45,16 +44,20 @@ def register_user(registration: RegisterRequest) -> dict[str, str]:
             detail="Ya existe una cuenta con ese correo.",
         ) from error
 
-    return {"id": str(user_id), "username": name, "email": email}
+    return {
+        "id": str(user_id),
+        "username": name,
+        "email": email,
+        "role": "cliente",
+    }
 
 
-@router.post("/login")
 def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
     identifier = credentials.username.strip()
     with database.get_connection() as connection:
         users = connection.execute(
             """
-            SELECT id, name, email, password_hash
+            SELECT id, name, email, password_hash, role
             FROM users
             WHERE email = ? COLLATE NOCASE OR name = ? COLLATE NOCASE
             """,
@@ -104,17 +107,16 @@ def login_user(credentials: LoginRequest, response: Response) -> dict[str, str]:
         "id": str(authenticated_user["id"]),
         "username": authenticated_user["name"],
         "email": authenticated_user["email"],
+        "role": authenticated_user["role"],
     }
 
 
-@router.get("/me")
 def current_user(
     user: Annotated[dict[str, object], Depends(get_current_user)],
 ) -> dict[str, object]:
     return user
 
 
-@router.post("/logout")
 def logout_user(
     response: Response,
     token: Annotated[str | None, Cookie(alias=SESSION_COOKIE_NAME)] = None,
@@ -133,3 +135,13 @@ def logout_user(
         path="/",
     )
     return {"message": "Sesión cerrada."}
+
+router.add_api_route(
+    "/register",
+    register_user,
+    methods=["POST"],
+    status_code=status.HTTP_201_CREATED,
+)
+router.add_api_route("/login", login_user, methods=["POST"])
+router.add_api_route("/me", current_user, methods=["GET"])
+router.add_api_route("/logout", logout_user, methods=["POST"])

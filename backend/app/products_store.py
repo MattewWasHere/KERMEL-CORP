@@ -64,12 +64,14 @@ def initialize_products() -> None:
             "SELECT 1 FROM app_metadata WHERE key = ?",
             ("products_initialized",),
         ).fetchone()
+
         if initialized:
             return
 
         existing_products = connection.execute(
             "SELECT 1 FROM products LIMIT 1"
         ).fetchone()
+
         if existing_products:
             connection.execute(
                 "INSERT INTO app_metadata (key, value) VALUES (?, ?)",
@@ -84,16 +86,28 @@ def initialize_products() -> None:
             products = _build_seed()
 
         for product in products:
+            category_name = product["category"].strip()
+            connection.execute(
+                "INSERT OR IGNORE INTO categories (name) VALUES (?)",
+                (category_name,),
+            )
+            category = connection.execute(
+                "SELECT id FROM categories WHERE name = ? COLLATE NOCASE",
+                (category_name,),
+            ).fetchone()
+
             connection.execute(
                 """
                 INSERT INTO products (
-                    id, name, category, brand, price, socket, stock, icon, specs, image
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, name, category, brand, price, socket, stock,
+                    icon, specs, image, category_id
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     product["id"],
                     product["name"],
-                    product["category"],
+                    category_name,
                     product["brand"],
                     product["price"],
                     product.get("socket"),
@@ -101,6 +115,7 @@ def initialize_products() -> None:
                     product["icon"],
                     json.dumps(product["specs"], ensure_ascii=False),
                     product.get("image"),
+                    category["id"],
                 ),
             )
 
@@ -114,8 +129,11 @@ def load_products() -> list[dict]:
     with database.get_connection() as connection:
         rows = connection.execute(
             """
-            SELECT id, name, category, brand, price, socket, stock, icon, specs, image
+            SELECT
+                id, name, category, category_id, brand, price,
+                socket, stock, reserved_stock, icon, specs, image
             FROM products
+            WHERE is_active = 1
             ORDER BY id
             """
         ).fetchall()
@@ -125,10 +143,11 @@ def load_products() -> list[dict]:
             "id": product["id"],
             "name": product["name"],
             "category": product["category"],
+            "category_id": product["category_id"],
             "brand": product["brand"],
             "price": product["price"],
             "socket": product["socket"],
-            "stock": product["stock"],
+            "stock": product["stock"] - product["reserved_stock"],
             "icon": product["icon"],
             "specs": json.loads(product["specs"]),
             "image": product["image"],

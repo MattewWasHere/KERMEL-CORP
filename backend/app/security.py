@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import Cookie, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, status
 
 from app import database
 
@@ -51,7 +51,7 @@ def get_current_user(
     with database.get_connection() as connection:
         session_record = connection.execute(
             """
-            SELECT users.id, users.name, users.email, sessions.expires_at
+            SELECT users.id, users.name, users.email, users.role, sessions.expires_at
             FROM sessions
             JOIN users ON users.id = sessions.user_id
             WHERE sessions.token_hash = ?
@@ -78,7 +78,19 @@ def get_current_user(
         )
 
     return {
-        "id": session_record["id"],
-        "username": session_record["name"],
-        "email": session_record["email"],
-    }
+    "id": session_record["id"],
+    "username": session_record["name"],
+    "email": session_record["email"],
+    "role": session_record["role"],
+}
+
+
+def get_current_admin(
+    user: Annotated[dict[str, object], Depends(get_current_user)],
+) -> dict[str, object]:
+    if user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Se requieren permisos de administrador.",
+        )
+    return user
