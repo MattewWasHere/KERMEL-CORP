@@ -1,97 +1,175 @@
 # KERMEL CORP
 
-Aplicación web con frontend en JavaScript, API FastAPI y base de datos SQLite.
+Aplicación web para la gestión y venta de componentes tecnológicos. El proyecto
+está dividido en una API backend y un frontend estático; ambos se ejecutan por
+separado en desarrollo.
+
+## Tecnologías
+
+- **Backend:** Python 3.10 o superior, FastAPI y Uvicorn.
+- **Base de datos:** SQLite. La API la inicializa y usa
+  `backend/data/kermel.db` para guardar los datos.
+- **Frontend:** HTML, CSS y JavaScript sin framework ni proceso de compilación.
+- **Gráficos:** Chart.js 4.4.1, cargado desde jsDelivr en la página del panel.
+- **Tipografía:** Inter, cargada desde Google Fonts.
+
+No se necesita Node.js ni npm para ejecutar el frontend. Para cargar Chart.js y
+Google Fonts en el navegador sí se necesita conexión a internet.
 
 ## Requisitos
 
-- Python 3.10 o posterior.
-- Windows 10/11, Linux o macOS.
+- Python 3.10 o superior.
+- Un navegador web moderno.
+- Git, si vas a clonar el repositorio.
 
-## Preparación inicial
+## Configuración inicial
 
-Abre una terminal en la raíz del proyecto y crea un entorno virtual. Puedes
-guardar el entorno en la raíz o dentro de `backend/`; los lanzadores detectan
-ambas ubicaciones.
-
-### Windows (PowerShell)
-
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
-```
+Ejecuta estos pasos desde la carpeta raíz del proyecto.
 
 ### Linux o macOS
 
 ```bash
+python3 --version
 python3 -m venv .venv
-./.venv/bin/python -m pip install -r backend/requirements-dev.txt
+.venv/bin/python -m pip install -r backend/requirements.txt
 ```
 
-## Iniciar frontend y backend
+### Windows PowerShell
 
-Desde la raíz del proyecto, ejecuta el lanzador de tu sistema:
+```powershell
+py --version
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
 
+Si ya existe el entorno `.venv`, no hace falta volver a crearlo: instala o
+actualiza las dependencias con el comando de `pip`.
+En Linux, también puedes omitir la configuración manual y ejecutar `./start.sh`;
+el script crea el entorno e instala las dependencias que falten.
 
-Los lanzadores inician FastAPI y un servidor local para el frontend. Si no
-encuentran las dependencias, muestran el comando para instalarlas. Deja
-abiertas las ventanas/terminales mientras uses la aplicación. En Linux/macOS,
-`Ctrl+C` detiene ambos servicios; en Windows, cierra ambas ventanas.
+## Iniciar la aplicación
 
-- Aplicación: <http://127.0.0.1:5500>
-- API: <http://127.0.0.1:8000>
-- Documentación: <http://127.0.0.1:8000/docs>
+### Linux: inicio automático
 
-Si prefieres iniciarlos manualmente, abre dos terminales.
+Desde la raíz del proyecto, ejecuta:
 
 ```bash
-# Terminal 1 (Linux/macOS), desde la raíz del proyecto
+chmod +x start.sh
+./start.sh
+```
+
+El script crea `.venv` si no existe, instala las dependencias del backend si
+hacen falta e inicia la API y el frontend. Abre <http://127.0.0.1:5500> en el
+navegador. La API y su documentación están en <http://127.0.0.1:8000> y
+<http://127.0.0.1:8000/docs>. Pulsa `Ctrl+C` en la terminal para detener ambos
+servicios.
+
+### Inicio manual
+
+Si prefieres arrancar los servicios por separado, sigue estos pasos. Necesitas
+dos terminales abiertas en la raíz del proyecto: una para la API y otra para el
+frontend.
+
+### 1. Iniciar la API
+
+En la primera terminal, entra a `backend` y ejecuta Uvicorn.
+
+**Linux o macOS:**
+
+```bash
 cd backend
-../.venv/bin/python -m uvicorn app.main:app --reload
+../.venv/bin/python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-```bash
-# Terminal 2 (Linux/macOS), desde la raíz del proyecto
-python -m http.server 5500 --bind 127.0.0.1 --directory frontend
-```
-
-En Windows, desde CMD o PowerShell, la primera terminal puede iniciar la API
-así:
+**Windows PowerShell:**
 
 ```powershell
 cd backend
-..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+..\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-En la segunda terminal, desde la raíz del proyecto, inicia el frontend:
+Deja esta terminal abierta mientras uses la aplicación. La API se inicia en
+<http://127.0.0.1:8000>. Puedes comprobar que está activa en
+<http://127.0.0.1:8000/api/health> y consultar sus endpoints en
+<http://127.0.0.1:8000/docs>.
 
-```powershell
-py -3 -m http.server 5500 --bind 127.0.0.1 --directory frontend
-```
+Al iniciar, la aplicación prepara la base de datos. En una instalación nueva,
+el catálogo se importa desde `backend/data/products.json` si está disponible;
+de lo contrario, utiliza el catálogo inicial definido por el backend. La base
+de datos permanece en `backend/data/kermel.db`: no la borres si quieres
+conservar los datos guardados.
 
-Si creaste el entorno virtual dentro de `backend/`, reemplaza la ruta del
-ejecutable por `.venv\Scripts\python.exe` desde esa carpeta.
+### 2. Iniciar el frontend
 
-## Pruebas
+Abre una segunda terminal en la raíz del proyecto y sirve la carpeta `frontend`
+por HTTP.
 
-Desde `backend/`, con el entorno virtual de la raíz del proyecto:
-
-```powershell
-..\.venv\Scripts\python.exe -m pytest -q
-```
+**Linux o macOS:**
 
 ```bash
-../.venv/bin/python -m pytest -q
+python3 -m http.server 5500 --directory frontend
 ```
 
-Si el entorno virtual está en `backend/.venv`, usa `.venv\Scripts\python.exe`
-en Windows o `.venv/bin/python` en Linux/macOS.
+**Windows PowerShell:**
 
-## Datos
+```powershell
+py -m http.server 5500 --directory frontend
+```
 
-La base de datos persistente está en `backend/data/kermel.db`. No la elimines
-si necesitas conservar las cuentas, pedidos y productos. El catálogo JSON se
-importa a SQLite la primera vez; el archivo `backend/data/products.json` se
-mantiene como respaldo inicial.
+Deja también esta terminal abierta. Abre <http://127.0.0.1:5500> en el
+navegador; la página de inicio de sesión es `index.html`. Para abrir otras
+páginas, usa `register.html`, `admin.html` o `Dashboard.html` en la misma
+dirección, por ejemplo <http://127.0.0.1:5500/register.html>.
 
-Para detalles de endpoints y el funcionamiento de la API, consulta
-[backend/README.md](backend/README.md).
+No abras los archivos HTML directamente con `file://`: el frontend necesita un
+origen HTTP para comunicarse correctamente con la API.
+
+### 3. Detener los servidores
+
+En cada terminal, pulsa `Ctrl+C`.
+
+## Direcciones locales
+
+| Servicio | Dirección |
+| --- | --- |
+| Frontend | <http://127.0.0.1:5500> |
+| API | <http://127.0.0.1:8000> |
+| Documentación de la API | <http://127.0.0.1:8000/docs> |
+| Comprobación de salud | <http://127.0.0.1:8000/api/health> |
+
+El frontend construye la dirección de la API con el mismo nombre de host que
+usas para abrirlo y el puerto `8000`. Por eso, usa el mismo host en ambos
+servicios (por ejemplo, `127.0.0.1` en los dos). La configuración CORS del
+backend permite por defecto los puertos de frontend `5500` y `5501`.
+
+Si necesitas usar otro puerto para el frontend, define
+`KERMEL_ALLOWED_ORIGINS` con el origen completo antes de iniciar la API. Por
+ejemplo, para el puerto `3000`:
+
+**Linux o macOS:**
+
+```bash
+export KERMEL_ALLOWED_ORIGINS="http://127.0.0.1:3000,http://localhost:3000"
+```
+
+**Windows PowerShell:**
+
+```powershell
+$env:KERMEL_ALLOWED_ORIGINS = "http://127.0.0.1:3000,http://localhost:3000"
+```
+
+Después, inicia o reinicia la API desde esa misma terminal.
+
+## Estructura principal
+
+```text
+backend/
+  app/                 API FastAPI, rutas y lógica de la aplicación
+  data/                Base SQLite y catálogo inicial
+  requirements.txt     Dependencias del backend
+frontend/
+  controller/          Controladores y configuración de la API
+  model/               Modelos del frontend
+  view/                Vistas y estilos
+  *.html               Páginas de la aplicación
+```
