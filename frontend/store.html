@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KERMEL CORP | Tienda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="view/styles.css" />
+    <link rel="stylesheet" href="view/store.css" />
+  </head>
+  <body class="store-body">
+    <header class="store-header">
+      <a class="store-brand" href="#catalogo"><span class="brand-mark">K</span><span>KERMEL <b>CORP</b></span></a>
+      <div class="header-search">
+        <form id="filters" class="search-form" role="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" name="search" type="search" placeholder="¿Qué estás buscando?" aria-label="Buscar producto" />
+          <button type="submit" aria-label="Buscar">Buscar</button>
+        </form>
+      </div>
+      <div class="store-user">
+        <span id="welcome" class="welcome-user"></span>
+        <div class="shopping-menu">
+          <button id="accountPanelToggle" class="shopping-toggle" type="button" aria-expanded="false" aria-controls="shoppingPanel">
+            <span class="shopping-icon" aria-hidden="true">▣</span>
+            <span>Mi compra</span>
+            <span id="cartCount" class="cart-count">0</span>
+          </button>
+          <div id="shoppingPanel" class="shopping-panel" hidden>
+            <div class="shopping-tabs" role="tablist" aria-label="Mi compra">
+              <button id="cartTab" type="button" class="shopping-tab active" role="tab" aria-selected="true" aria-controls="cartPanel">Carrito</button>
+              <button id="ordersTab" type="button" class="shopping-tab" role="tab" aria-selected="false" aria-controls="ordersPanel">Mis pedidos</button>
+            </div>
+            <section id="cartPanel" class="shopping-content" role="tabpanel" aria-labelledby="cartTab">
+              <div id="cartContents"></div>
+              <div class="cart-footer"><strong>Total <span id="cartTotal">$ 0</span></strong><button id="checkoutButton" type="button">Finalizar compra</button></div>
+              <p id="cartMessage" class="store-message" aria-live="polite"></p>
+            </section>
+            <section id="ordersPanel" class="shopping-content" role="tabpanel" aria-labelledby="ordersTab" hidden>
+              <div id="ordersContents"></div>
+              <p id="orderMessage" class="store-message" aria-live="polite"></p>
+              <div class="notification-heading"><strong>Notificaciones</strong><button id="loadNotifications" class="text-button" type="button">Actualizar</button></div>
+              <ul id="notifications" class="notification-list"></ul>
+            </section>
+          </div>
+        </div>
+        <button id="logoutButton" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+    <main class="store-main">
+      <section id="catalogo">
+        <div class="store-title">
+          <div><p class="store-eyebrow">Tecnología para llevar tu setup más lejos</p><h1>Encuentra tu próximo componente</h1><p class="store-intro">Piezas confiables para armar, mejorar y potenciar tu equipo.</p></div>
+          <button id="refreshButton" class="refresh-button" type="button"><span aria-hidden="true">↻</span> Actualizar</button>
+        </div>
+        <div class="catalog-toolbar">
+          <details class="category-dropdown">
+            <summary><span class="category-symbol" aria-hidden="true">☷</span><span id="categoryLabel">Todas las categorías</span><span class="chevron" aria-hidden="true">⌄</span></summary>
+            <div id="categoryMenu" class="category-menu" role="menu"></div>
+          </details>
+          <div class="filter-dropdown">
+            <button id="filterToggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filterPanel">Filtros <span aria-hidden="true">⌄</span></button>
+            <div id="filterPanel" class="filter-panel" hidden>
+              <label>Marca<select id="brandFilter" name="brand" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select></label>
+              <div class="price-filters"><label>Precio desde<input id="minPrice" name="min_price" type="number" min="0" placeholder="Mínimo" /></label><label>Hasta<input id="maxPrice" name="max_price" type="number" min="0" placeholder="Máximo" /></label></div>
+              <div class="filter-actions"><button id="applyFilters" type="button">Aplicar</button><button id="clearFilters" type="button" class="text-button">Limpiar</button></div>
+            </div>
+          </div>
+          <p id="resultsCount" class="results-count"></p>
+        </div>
+        <p id="storeMessage" class="store-message" aria-live="polite"></p>
+        <div id="products" class="product-grid" aria-live="polite"></div>
+      </section>
+    </main>
+    <script src="controller/api-config.js?v=4"></script>
+    <script src="controller/StoreController.js"></script>
+  </body>
+</html>

@@ -66,6 +66,30 @@ def list_products(
     return [serialize_product(row) for row in rows]
 
 
+def list_admin_products(
+    _: Annotated[dict[str, object], Depends(get_current_admin)],
+) -> list[dict[str, object]]:
+    with database.get_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT products.*, categories.name AS category
+            FROM products
+            LEFT JOIN categories ON categories.id = products.category_id
+            WHERE products.is_active = 1
+            ORDER BY products.id
+            """
+        ).fetchall()
+
+    return [
+        {
+            **serialize_product(product),
+            "stock_total": product["stock"],
+            "reserved_stock": product["reserved_stock"],
+        }
+        for product in rows
+    ]
+
+
 def get_product(product_id: int) -> dict[str, object]:
     with database.get_connection() as connection:
         product = connection.execute(
@@ -210,6 +234,7 @@ def delete_product(
 
 
 router.add_api_route("", list_products, methods=["GET"])
+router.add_api_route("/admin", list_admin_products, methods=["GET"])
 router.add_api_route("/{product_id}", get_product, methods=["GET"])
 router.add_api_route(
     "",

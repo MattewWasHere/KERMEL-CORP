@@ -24,7 +24,7 @@
       <section class="auth-card" aria-label="Crear nueva cuenta">
         <h2>Crear cuenta</h2>
 
-        <form id="registerForm">
+        <form id="registerForm" novalidate>
           <div class="input-group">
             <label for="name">Nombre completo</label>
             <input id="name" name="name" type="text" autocomplete="name" maxlength="100" required />
@@ -55,10 +55,10 @@
       </section>
     </main>
 
-    <script src="controller/api-config.js"></script>
+    <script src="controller/api-config.js?v=4"></script>
     <script src="model/UserModel.js"></script>
-    <script src="view/AuthView.js"></script>
-    <script src="controller/AuthController.js"></script>
+    <script src="view/AuthView.js?v=2"></script>
+    <script src="controller/AuthController.js?v=2"></script>
     <script src="controller/app.js"></script>
   </body>
 </html>

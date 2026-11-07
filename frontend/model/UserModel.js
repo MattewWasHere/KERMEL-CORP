@@ -15,8 +15,16 @@ class UserModel {
     return this.request("/auth/login", { username: username, password: password });
   }
 
+  getCurrentUser() {
+    return window.KERMEL_API.request("/auth/me");
+  }
+
   register(user) {
     return this.request("/auth/register", user);
+  }
+
+  logout() {
+    return window.KERMEL_API.request("/auth/logout", { method: "POST" });
   }
 }
 

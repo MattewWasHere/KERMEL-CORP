@@ -13,17 +13,39 @@
       event.preventDefault();
 
       const { username, password } = this.view.getCredentials();
-      if (!username.trim() || !password.trim()) {
-        this.view.setMessage("error", "Completa todos los campos para continuar.");
-        return;
-      }
+      if (!this.view.validate()) return;
 
       this.view.setSubmitting(true, "Ingresando…");
       try {
         const user = await this.model.login(username, password);
-        this.view.setMessage("success", `Bienvenido ${user.username}. Acceso autorizado.`);
+        let session;
+        try {
+          session = await this.model.getCurrentUser();
+        } catch (error) {
+          if (error.status === 401) {
+            throw new Error(
+              "La API aceptó las credenciales, pero no reconoció la sesión. " +
+              `Origen del frontend: ${window.location.origin}. API: ${window.KERMEL_API_BASE_URL}. ` +
+              "En desarrollo HTTP, confirma que KERMEL_COOKIE_SECURE=false y que " +
+              `KERMEL_ALLOWED_ORIGINS incluya ${window.location.origin}; después reinicia FastAPI. ` +
+              "Abre el frontend por HTTP y usa el mismo host (localhost o 127.0.0.1) en ambos servicios."
+            );
+          }
+          throw error;
+        }
+
+        if (String(session.id) !== String(user.id)) {
+          throw new Error("No se pudo validar la sesión iniciada. Vuelve a intentarlo.");
+        }
+
+        const isAdminLogin = this.view.form?.id === "adminLoginForm";
+        if (isAdminLogin && session.role !== "admin") {
+          await this.model.logout();
+          throw new Error("Esta cuenta no tiene permisos de administrador.");
+        }
+        this.view.setMessage("success", `Bienvenido ${session.username}. Acceso autorizado.`);
         this.view.resetForm();
-        window.location.assign("Dashboard.html");
+        window.location.assign(session.role === "admin" ? "Dashboard.html" : "store.html");
       } catch (error) {
         this.view.setMessage("error", error.message);
       } finally {
@@ -46,15 +68,7 @@
       event.preventDefault();
 
       const data = this.view.getCredentials();
-      if (!data.name.trim() || !data.email.trim() || !data.password.trim()) {
-        this.view.setMessage("error", "Completa todos los campos.");
-        return;
-      }
-
-      if (data.password !== data.confirmPassword) {
-        this.view.setMessage("error", "Las contraseñas no coinciden.");
-        return;
-      }
+      if (!this.view.validate({ confirmPassword: true })) return;
 
       const user = {
         name: data.name.trim(),

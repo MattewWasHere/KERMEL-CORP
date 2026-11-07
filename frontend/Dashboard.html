@@ -3,101 +3,79 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KERMEL CORP | Panel de ventas</title>
+    <title>KERMEL CORP | Administración</title>
     <link rel="stylesheet" href="view/Dashboard.css" />
   </head>
   <body>
     <aside>
       <h2>KERMEL CORP</h2>
-      <a href="#resumen" class="activo">Resumen</a>
-      <a href="#graficos">Gráficos</a>
+      <a href="#resumen" class="activo">Inventario</a>
+      <a href="#productos">Productos</a>
+      <a href="#categorias">Categorías</a>
       <a href="#pedidos">Pedidos</a>
     </aside>
-
     <main class="contenido">
-      <div class="barra">
-        <h1>
-          Ventas en vivo
-          <span id="estadoConexion" class="vivo">
-            <span class="punto"></span>
-            <span id="textoConexion">Conectando…</span>
-          </span>
-        </h1>
-        <div class="controles">
-          <button id="btnPausa" type="button">Pausar</button>
-          <button id="btnOscuro" type="button">Modo oscuro</button>
-          <button id="btnCerrarSesion" type="button">Cerrar sesión</button>
-        </div>
-      </div>
+      <header class="barra">
+        <h1>Administración <span id="estadoConexion" class="vivo"><span class="punto"></span><span id="textoConexion">Conectando…</span></span></h1>
+        <div class="controles"><button id="refreshButton" type="button">Actualizar</button><button id="btnCerrarSesion" type="button">Cerrar sesión</button></div>
+      </header>
 
-      <section id="resumen" class="tarjetas" aria-label="Resumen de ventas"></section>
+      <section id="resumen" class="tarjetas" aria-label="Resumen de inventario"></section>
+      <section class="panel">
+        <h2>Unidades disponibles por categoría</h2>
+        <div id="categorySummary" class="category-summary"></div>
+      </section>
 
-      <section id="graficos" class="graficos">
-        <div class="panel">
-          <h2>Ventas de los últimos 2 minutos</h2>
-          <div class="caja-grafico"><canvas id="grafLinea"></canvas></div>
+      <section id="productos" class="panel">
+        <div class="section-title"><h2>Productos</h2><p>En edición ajusta el stock total; el catálogo muestra unidades disponibles después de descontar reservas.</p></div>
+        <form id="productForm" class="admin-form" novalidate>
+          <input type="hidden" name="product_id" />
+          <label>Nombre<input name="name" maxlength="120" required /></label>
+          <label>Marca<input name="brand" maxlength="80" required /></label>
+          <label>Categoría<select name="category_id" required></select></label>
+          <label>Precio (COP)<input name="price" type="number" min="0" step="1" required /></label>
+          <label>Stock total (incluye reservado)<input name="stock" type="number" min="0" step="1" required /></label>
+          <label>Socket<input name="socket" maxlength="40" /></label>
+          <label>Icono<input name="icon" maxlength="20" value="📦" /></label>
+          <label>Imagen (URL)<input name="image" type="url" /></label>
+          <label class="wide-field">Especificaciones (una por línea)<textarea name="specs" rows="3"></textarea></label>
+          <div class="form-actions"><button type="submit" id="saveProductButton">Crear producto</button><button type="button" class="secondary-button" id="cancelProductEdit" hidden>Cancelar edición</button></div>
+        </form>
+        <p id="productMessage" class="feedback" aria-live="polite"></p>
+        <div class="table-toolbar">
+          <label for="productSearch">Buscar en el inventario</label>
+          <input id="productSearch" type="search" maxlength="120" placeholder="Producto, marca o categoría" />
+          <p id="productResultsCount" aria-live="polite"></p>
         </div>
-        <div class="panel">
-          <h2>Ventas por categoría</h2>
-          <div class="caja-grafico"><canvas id="grafDona"></canvas></div>
-        </div>
+        <div class="tabla-wrap"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Marca</th><th>Precio</th><th>Stock total</th><th>Reservado</th><th>Disponible</th><th>Acciones</th></tr></thead><tbody id="productsTable"></tbody></table></div>
+      </section>
+
+      <section id="categorias" class="panel">
+        <h2>Categorías</h2>
+        <form id="categoryForm" class="admin-form category-form" novalidate>
+          <input type="hidden" name="category_id" />
+          <label>Nombre<input name="name" maxlength="80" required /></label>
+          <label>Descripción<input name="description" maxlength="300" /></label>
+          <div class="form-actions"><button type="submit" id="saveCategoryButton">Crear categoría</button><button type="button" class="secondary-button" id="cancelCategoryEdit" hidden>Cancelar edición</button></div>
+        </form>
+        <p id="categoryMessage" class="feedback" aria-live="polite"></p>
+        <div id="categoriesList" class="categories-list"></div>
       </section>
 
       <section id="pedidos" class="panel">
-        <h2>Últimos pedidos</h2>
-        <form id="pedidoForm" class="pedido-form">
-          <div class="campos-pedido">
-            <div class="campo-pedido">
-              <label for="pedidoCliente">Cliente</label>
-              <input id="pedidoCliente" name="cliente" maxlength="120" required />
-            </div>
-            <div class="campo-pedido">
-              <label for="pedidoProducto">Producto</label>
-              <input id="pedidoProducto" name="producto" maxlength="120" required />
-            </div>
-            <div class="campo-pedido">
-              <label for="pedidoCategoria">Categoría</label>
-              <input id="pedidoCategoria" name="categoria" maxlength="80" required />
-            </div>
-            <div class="campo-pedido">
-              <label for="pedidoTotal">Total (COP)</label>
-              <input id="pedidoTotal" name="total" type="number" min="1" step="1" required />
-            </div>
-            <div class="campo-pedido">
-              <label for="pedidoEstado">Estado</label>
-              <select id="pedidoEstado" name="estado">
-                <option>Pagado</option>
-                <option>Pendiente</option>
-                <option>Cancelado</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <button type="submit">Guardar pedido</button>
-            <p id="mensajePedido" class="mensaje-pedido" aria-live="polite"></p>
-          </div>
-        </form>
-
-        <div class="tabla-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>Cliente</th>
-                <th>Producto</th>
-                <th>Categoría</th>
-                <th>Total</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody id="cuerpoTabla"></tbody>
-          </table>
-        </div>
+        <div class="section-title"><h2>Pedidos recientes</h2><p>Los pedidos avanzan de Pendiente a Confirmado, Enviado y Entregado.</p></div>
+        <p id="orderMessage" class="feedback" aria-live="polite"></p>
+        <div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Categoría</th><th>Total</th><th>Estado / acciones</th></tr></thead><tbody id="ordersTable"></tbody></table></div>
       </section>
     </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
-    <script src="controller/api-config.js"></script>
-    <script src="controller/DashboardController.js"></script>
+    <dialog id="orderDialog" aria-labelledby="orderDialogTitle">
+      <div class="dialog-heading">
+        <h2 id="orderDialogTitle">Detalle del pedido</h2>
+        <button id="closeOrderDialog" type="button" aria-label="Cerrar detalle">Cerrar</button>
+      </div>
+      <div id="orderDetails"></div>
+    </dialog>
+    <script src="controller/api-config.js?v=4"></script>
+    <script src="controller/DashboardController.js?v=2"></script>
   </body>
 </html>

@@ -117,9 +117,11 @@ py -m http.server 5500 --directory frontend
 ```
 
 Deja también esta terminal abierta. Abre <http://127.0.0.1:5500> en el
-navegador; la página de inicio de sesión es `index.html`. Para abrir otras
-páginas, usa `register.html`, `admin.html` o `Dashboard.html` en la misma
-dirección, por ejemplo <http://127.0.0.1:5500/register.html>.
+navegador; la página de inicio de sesión es `index.html`. Los clientes llegan
+a la tienda (`store.html`) tras iniciar sesión; los administradores llegan al
+panel de gestión (`Dashboard.html`). También puedes abrir `register.html` o
+`admin.html` en la misma dirección, por ejemplo
+<http://127.0.0.1:5500/register.html>.
 
 No abras los archivos HTML directamente con `file://`: el frontend necesita un
 origen HTTP para comunicarse correctamente con la API.
@@ -171,5 +173,18 @@ frontend/
   controller/          Controladores y configuración de la API
   model/               Modelos del frontend
   view/                Vistas y estilos
-  *.html               Páginas de la aplicación
+  *.html               Login, registro, tienda y panel administrativo
 ```
+
+La tienda conecta el catálogo, filtros, carrito, checkout, pedidos y
+notificaciones de la API. El panel administrativo gestiona inventario,
+productos, categorías y estados de pedidos. El registro público crea cuentas
+de cliente; las cuentas con rol `admin` deben ser aprovisionadas por el
+administrador del sistema y no se pueden crear desde el formulario público.
+El catálogo administrativo usa `GET /api/products/admin`, que requiere sesión
+de administrador y devuelve el stock total y el reservado para que las
+actualizaciones de inventario no confundan disponibilidad con unidades físicas.
+
+Consulta la [guía de integración del frontend y el backend](./GUIA-INTEGRACION-FRONTEND-BACKEND.md)
+para ver el flujo del panel, los campos de productos, las rutas disponibles y
+las reglas del inventario y los pedidos.
